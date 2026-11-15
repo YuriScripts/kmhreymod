@@ -14,7 +14,7 @@
 #include "imgui_impl_android.h"
 #include "And64InlineHook.hpp" // Fixed include path
 
-#define LOG_TAG "KMHREY_MOD"
+#define LOG_TAG "DEFYNN_MOD"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 
 struct Vector3 {
@@ -199,7 +199,7 @@ void* hack_thread(void* arg) {
 
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     ImGui::CreateContext();
-    ImGui_ImplAndroid_Init();
+    ImGui_ImplAndroid_Init(ANativeWindow_fromSurface(dpy, surf));
     ImGui_ImplOpenGL3_Init("#version 300 es");
     
     void* target = dlsym(RTLD_DEFAULT, "eglSwapBuffers");
