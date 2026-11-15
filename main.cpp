@@ -67,23 +67,7 @@ void GetModuleInfo(const char* moduleName, uintptr_t& base, size_t& size) {
     fclose(fp);
 }
 
-uintptr_t FindPattern(uintptr_t start, size_t size, const char* pattern, const char* mask) {
-    size_t patternLen = strlen(mask);
-    uint8_t* data = (uint8_t*)start;
-    for (size_t i = 0; i <= size - patternLen; i++) {
-        bool found = true;
-        for (size_t j = 0; j < patternLen; j++) {
-            if (mask[j] == 'x' && data[i + j] != (uint8_t)pattern[j]) {
-                found = false;
-                break;
-            }
-        }
-        if (found) return start + i;
-    }
-    return 0;
-}
-
-// We removed the fake pattern finds here so you can just fill them in later
+// Placeholder for your AOB scanning
 void InitOffsets() {
     LOGI("Offsets initialized (placeholders).");
     g_ViewMatrix = 0; 
@@ -170,6 +154,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     ImGui_ImplOpenGL3_Init("#version 300 es");
     
     void* target = dlsym(RTLD_DEFAULT, "eglSwapBuffers");
+    // Use And64InlineHook instead of Dobby
     A64HookFunction(target, (void*)hook_eglSwapBuffers, (void**)&orig_eglSwapBuffers);
     
     pthread_t ptid;
