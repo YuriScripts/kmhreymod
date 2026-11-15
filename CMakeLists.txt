@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.18.1)
 project("kmhrey_menu")
 
-# Add Dobby as a subdirectory so CMake builds it automatically
+# Tell Dobby to use the C++ bridge instead of the broken Apple ASM
+set(DOBBY_ARCH arm64)
+set(DOBBY_OS android)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DDOBBY_OS_ANDROID")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDOBBY_OS_ANDROID")
+
+# Add Dobby
 add_subdirectory(dobby)
 
 add_library(kmhrey_menu SHARED
@@ -14,7 +20,6 @@ add_library(kmhrey_menu SHARED
     imgui/backends/imgui_impl_android.cpp
 )
 
-# Find Android libraries
 find_library(log-lib log)
 find_library(android-lib android)
 find_library(EGL-lib EGL)
