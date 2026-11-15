@@ -20,7 +20,7 @@ jobs:
           mv imgui-1.90.1 imgui
           git clone https://github.com/jmpews/Dobby.git
           mkdir dobby
-          cp Dobby/source/dobby.c dobby/dobby.c
+          cp Dobby/source/dobby.cc dobby/dobby.cc
 
       - name: Configure CMake
         run: |
