@@ -19,15 +19,9 @@ jobs:
           unzip v1.90.1.zip
           mv imgui-1.90.1 imgui
           git clone https://github.com/Rprop/And64InlineHook.git
-          mv And64InlineHook hook
-          cp hook/And64InlineHook.cpp hook/And64InlineHook.hpp 
-          
-      - name: Fix Dobby Assembly Issue
-        run: |
-          # Delete the broken Mac assembly file
-          rm dobby/source/TrampolineBridge/ClosureTrampolineBridge/arm64/closure_bridge_arm64.asm
-          # Enable the C++ fallback in Dobby's source
-          sed -i 's/#if 0/#if 1/g' dobby/source/TrampolineBridge/ClosureTrampolineBridge/arm64/closure_bridge_arm64.cc
+          # Move the hook files directly to the root so CMake can find them
+          mv And64InlineHook/And64InlineHook.cpp .
+          mv And64InlineHook/And64InlineHook.hpp .
 
       - name: Configure CMake
         run: |
