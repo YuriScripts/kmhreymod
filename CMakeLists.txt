@@ -3,17 +3,14 @@ project("kmhrey_menu")
 
 add_library(kmhrey_menu SHARED
     main.cpp
+    And64InlineHook.cpp
     imgui/imgui.cpp
     imgui/imgui_draw.cpp
     imgui/imgui_tables.cpp
     imgui/imgui_widgets.cpp
     imgui/backends/imgui_impl_opengl3.cpp
     imgui/backends/imgui_impl_android.cpp
-    And64InlineHook.cpp
 )
-
-# Need this for Android includes
-target_include_directories(kmhrey_menu PRIVATE .)
 
 find_library(log-lib log)
 find_library(android-lib android)
