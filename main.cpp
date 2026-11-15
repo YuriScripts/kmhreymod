@@ -8,7 +8,7 @@
 #include <cstring>
 #include <vector>
 #include <cstdio>
-#include <android/native_window.h>
+#include <android/native_window_jni.h>
 
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
