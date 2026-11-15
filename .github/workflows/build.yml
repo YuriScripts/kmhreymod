@@ -19,8 +19,14 @@ jobs:
           unzip v1.90.1.zip
           mv imgui-1.90.1 imgui
           git clone https://github.com/jmpews/Dobby.git
-          # Rename Dobby folder so CMake can find it cleanly
           mv Dobby dobby
+          
+      - name: Fix Dobby Assembly Issue
+        run: |
+          # Delete the broken Mac assembly file
+          rm dobby/source/TrampolineBridge/ClosureTrampolineBridge/arm64/closure_bridge_arm64.asm
+          # Enable the C++ fallback in Dobby's source
+          sed -i 's/#if 0/#if 1/g' dobby/source/TrampolineBridge/ClosureTrampolineBridge/arm64/closure_bridge_arm64.cc
 
       - name: Configure CMake
         run: |
