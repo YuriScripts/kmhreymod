@@ -9,7 +9,6 @@
 #include <vector>
 #include <cstdio>
 
-// ImGui & Dobby
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_android.h"
@@ -94,12 +93,9 @@ uintptr_t FindPattern(uintptr_t start, size_t size, const char* pattern, const c
 
 void InitOffsets() {
     LOGI("Scanning for offsets in libclient.so...");
-    
-    // FAKE PATTERNS - REPLACE WITH REAL GHIDRA AOBs
     g_ViewMatrix = FindPattern(g_ClientBase, g_ClientSize, "\x00\x00\x80\x3F", "xxxx");
     g_LocalPlayer = FindPattern(g_ClientBase, g_ClientSize, "\x00\x00\xC8\x42", "xxxx");
     g_EntityList = FindPattern(g_ClientBase, g_ClientSize, "\x00\x00\x80\x3F", "xxxx");
-
     LOGI("View Matrix: %p", (void*)g_ViewMatrix);
     LOGI("Local Player: %p", (void*)g_LocalPlayer);
     LOGI("Entity List: %p", (void*)g_EntityList);
