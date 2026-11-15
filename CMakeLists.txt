@@ -12,11 +12,11 @@ add_library(kmhrey_menu SHARED
     imgui/backends/imgui_impl_android.cpp
 )
 
-# THIS IS THE FIX: Tell CMake where to find the header files
+# Look in the root directory, and inside the imgui folders
 target_include_directories(kmhrey_menu PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/imgui
-    ${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends
+    .
+    imgui
+    imgui/backends
 )
 
 find_library(log-lib log)
