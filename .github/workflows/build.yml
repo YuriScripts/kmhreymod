@@ -21,7 +21,7 @@ jobs:
           git clone https://github.com/Rprop/And64InlineHook.git
           cp And64InlineHook/And64InlineHook.cpp .
           cp And64InlineHook/And64InlineHook.hpp .
-          ls -la # Lists files to verify they are there
+          ls -la
 
       - name: Configure CMake
         run: |
