@@ -19,8 +19,8 @@ jobs:
           unzip v1.90.1.zip
           mv imgui-1.90.1 imgui
           git clone https://github.com/jmpews/Dobby.git
-          mkdir dobby
-          cp Dobby/source/dobby.cc dobby/dobby.cc
+          # Rename Dobby folder so CMake can find it cleanly
+          mv Dobby dobby
 
       - name: Configure CMake
         run: |
