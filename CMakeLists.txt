@@ -9,7 +9,7 @@ add_library(kmhrey_menu SHARED
     imgui/imgui_widgets.cpp
     imgui/backends/imgui_impl_opengl3.cpp
     imgui/backends/imgui_impl_android.cpp
-    dobby/dobby.c
+    dobby/dobby.cc
 )
 
 target_link_libraries(kmhrey_menu
