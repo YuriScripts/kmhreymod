@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.18.1)
 project("kmhrey_menu")
 
+# Add all source files
 add_library(kmhrey_menu SHARED
     main.cpp
     And64InlineHook.cpp
@@ -12,11 +13,11 @@ add_library(kmhrey_menu SHARED
     imgui/backends/imgui_impl_android.cpp
 )
 
-# Look in the root directory, and inside the imgui folders
+# Force the compiler to look in the main folder, imgui, and imgui/backends
 target_include_directories(kmhrey_menu PRIVATE 
-    .
-    imgui
-    imgui/backends
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends
 )
 
 find_library(log-lib log)
