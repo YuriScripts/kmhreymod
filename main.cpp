@@ -12,7 +12,7 @@
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_android.h"
-#include "dobby.h"
+#include "And64InlineHook.hpp"
 
 #define LOG_TAG "KMHREY_MOD"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
@@ -27,16 +27,8 @@ struct Vector3 {
     }
 };
 
-struct Matrix4x4 {
-    float m[4][4];
-};
-
-struct Entity {
-    uintptr_t address;
-    Vector3 position;
-    int team;
-    float distance;
-};
+struct Matrix4x4 { float m[4][4]; };
+struct Entity { uintptr_t address; Vector3 position; int team; float distance; };
 
 bool g_MenuOpen = false;
 bool g_ESP_Player = false;
@@ -91,14 +83,12 @@ uintptr_t FindPattern(uintptr_t start, size_t size, const char* pattern, const c
     return 0;
 }
 
+// We removed the fake pattern finds here so you can just fill them in later
 void InitOffsets() {
-    LOGI("Scanning for offsets in libclient.so...");
-    g_ViewMatrix = FindPattern(g_ClientBase, g_ClientSize, "\x00\x00\x80\x3F", "xxxx");
-    g_LocalPlayer = FindPattern(g_ClientBase, g_ClientSize, "\x00\x00\xC8\x42", "xxxx");
-    g_EntityList = FindPattern(g_ClientBase, g_ClientSize, "\x00\x00\x80\x3F", "xxxx");
-    LOGI("View Matrix: %p", (void*)g_ViewMatrix);
-    LOGI("Local Player: %p", (void*)g_LocalPlayer);
-    LOGI("Entity List: %p", (void*)g_EntityList);
+    LOGI("Offsets initialized (placeholders).");
+    g_ViewMatrix = 0; 
+    g_LocalPlayer = 0;
+    g_EntityList = 0;
 }
 
 bool WorldToScreen(Vector3 pos, Vector3& screen, Matrix4x4 viewMatrix, int width, int height) {
@@ -113,13 +103,6 @@ bool WorldToScreen(Vector3 pos, Vector3& screen, Matrix4x4 viewMatrix, int width
 
 std::vector<Entity> GetEntities() {
     std::vector<Entity> entities;
-    if (!g_LocalPlayer || !g_EntityList) return entities;
-    Entity dummy;
-    dummy.address = g_EntityList;
-    dummy.position = {100.0f, 0.0f, 100.0f};
-    dummy.team = 2;
-    dummy.distance = 50.0f;
-    entities.push_back(dummy);
     return entities;
 }
 
@@ -128,17 +111,6 @@ void DrawESP() {
     ImGuiIO& io = ImGui::GetIO();
     ImDrawList* draw = ImGui::GetBackgroundDrawList();
     if (g_Aimbot) draw->AddCircle(ImVec2(io.DisplaySize.x / 2.0f, io.DisplaySize.y / 2.0f), g_AimbotFOV, IM_COL32(255, 255, 255, 100), 100, 2.0f);
-    if (g_ViewMatrix) {
-        Matrix4x4 vm = *(Matrix4x4*)g_ViewMatrix;
-        for (auto& ent : GetEntities()) {
-            Vector3 screenPos;
-            if (WorldToScreen(ent.position, screenPos, vm, io.DisplaySize.x, io.DisplaySize.y)) {
-                if (g_ESP_Box) draw->AddRect(ImVec2(screenPos.x - 20, screenPos.y - 40), ImVec2(screenPos.x + 20, screenPos.y + 40), IM_COL32(255, 0, 0, 255), 0, 0, 2.0f);
-                if (g_ESP_Lines) draw->AddLine(ImVec2(io.DisplaySize.x / 2.0f, io.DisplaySize.y), ImVec2(screenPos.x, screenPos.y), IM_COL32(255, 0, 0, 255), 1.5f);
-                if (g_ESP_Player) draw->AddText(ImVec2(screenPos.x - 10, screenPos.y - 50), IM_COL32(255, 255, 255, 255), "PLAYER");
-            }
-        }
-    }
 }
 
 typedef void (*eglSwapBuffers_t)(void* dpy, void* surf);
@@ -196,8 +168,10 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     ImGui::CreateContext();
     ImGui_ImplAndroid_Init();
     ImGui_ImplOpenGL3_Init("#version 300 es");
-    void* target = DobbySymbolResolver("libEGL.so", "eglSwapBuffers");
-    DobbyHook(target, (void*)hook_eglSwapBuffers, (void**)&orig_eglSwapBuffers);
+    
+    void* target = dlsym(RTLD_DEFAULT, "eglSwapBuffers");
+    A64HookFunction(target, (void*)hook_eglSwapBuffers, (void**)&orig_eglSwapBuffers);
+    
     pthread_t ptid;
     pthread_create(&ptid, NULL, hack_thread, NULL);
     return JNI_VERSION_1_6;
