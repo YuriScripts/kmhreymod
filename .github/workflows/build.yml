@@ -18,8 +18,9 @@ jobs:
           wget https://github.com/ocornut/imgui/archive/refs/tags/v1.90.1.zip
           unzip v1.90.1.zip
           mv imgui-1.90.1 imgui
-          git clone https://github.com/jmpews/Dobby.git
-          mv Dobby dobby
+          git clone https://github.com/Rprop/And64InlineHook.git
+          mv And64InlineHook hook
+          cp hook/And64InlineHook.cpp hook/And64InlineHook.hpp 
           
       - name: Fix Dobby Assembly Issue
         run: |
