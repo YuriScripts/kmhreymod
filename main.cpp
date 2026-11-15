@@ -8,13 +8,14 @@
 #include <cstring>
 #include <vector>
 #include <cstdio>
+#include <android/native_window.h>
 
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_android.h"
-#include "And64InlineHook.hpp" // Fixed include path
+#include "And64InlineHook.hpp"
 
-#define LOG_TAG "DEFYNN_MOD"
+#define LOG_TAG "KMHREY_MOD"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 
 struct Vector3 {
@@ -30,7 +31,6 @@ struct Vector3 {
 struct Matrix4x4 { float m[4][4]; };
 struct Entity { uintptr_t address; Vector3 position; int team; float distance; };
 
-// ======================= CHEAT TOGGLES =======================
 bool g_MenuOpen = false;
 bool g_ESP_Player = false;
 bool g_ESP_Lines = false;
@@ -60,6 +60,9 @@ uintptr_t g_LocalPlayer = 0;
 uintptr_t g_ViewMatrix = 0;
 uintptr_t g_EntityList = 0;
 
+ANativeWindow* g_Window = nullptr;
+bool g_ImGuiInitialized = false;
+
 void GetModuleInfo(const char* moduleName, uintptr_t& base, size_t& size) {
     FILE* fp = fopen("/proc/self/maps", "r");
     if (!fp) return;
@@ -78,7 +81,6 @@ void GetModuleInfo(const char* moduleName, uintptr_t& base, size_t& size) {
 
 void InitOffsets() {
     LOGI("Offsets initialized (placeholders).");
-    // You will need to replace these 0s with the actual pointers found in Ghidra
     g_ViewMatrix = 0; 
     g_LocalPlayer = 0;
     g_EntityList = 0;
@@ -96,47 +98,40 @@ bool WorldToScreen(Vector3 pos, Vector3& screen, Matrix4x4 viewMatrix, int width
 
 std::vector<Entity> GetEntities() {
     std::vector<Entity> entities;
-    // TODO: Read from memory using g_EntityList
     return entities;
 }
 
-// ======================= FEATURE LOGIC =======================
 void ApplyFeatures() {
-    // All your toggle logic goes here, writing to the memory addresses found in Ghidra
-    if (g_FistToRPG) { /* Write RPG weapon ID */ }
-    if (g_NoRecoil) { /* Patch recoil float to 0.0f */ }
-    if (g_FastHeal) { /* Patch heal timer float */ }
-    if (g_NoGrass) { /* Patch grass density to 0 */ }
-    if (g_NoFallDamage) { /* Patch fall damage multiplier */ }
-    if (g_WideView) { /* Patch camera FOV */ }
-    if (g_FastShoot) { /* Patch shoot delay */ }
-    if (g_WallHack) { /* Patch wall render depth */ }
+    if (g_FistToRPG) { }
+    if (g_NoRecoil) { }
+    if (g_FastHeal) { }
+    if (g_NoGrass) { }
+    if (g_NoFallDamage) { }
+    if (g_WideView) { }
+    if (g_FastShoot) { }
+    if (g_WallHack) { }
 }
 
 void DrawESP() {
     if (!g_ESP_Player && !g_ESP_Lines && !g_ESP_Box) return;
     ImGuiIO& io = ImGui::GetIO();
     ImDrawList* draw = ImGui::GetBackgroundDrawList();
-    
     if (g_Aimbot) draw->AddCircle(ImVec2(io.DisplaySize.x / 2.0f, io.DisplaySize.y / 2.0f), g_AimbotFOV, IM_COL32(255, 255, 255, 100), 100, 2.0f);
-
-    if (g_ViewMatrix) {
-        Matrix4x4 vm = *(Matrix4x4*)g_ViewMatrix;
-        for (auto& ent : GetEntities()) {
-            Vector3 screenPos;
-            if (WorldToScreen(ent.position, screenPos, vm, io.DisplaySize.x, io.DisplaySize.y)) {
-                if (g_ESP_Box) draw->AddRect(ImVec2(screenPos.x - 20, screenPos.y - 40), ImVec2(screenPos.x + 20, screenPos.y + 40), IM_COL32(255, 0, 0, 255), 0, 0, 2.0f);
-                if (g_ESP_Lines) draw->AddLine(ImVec2(io.DisplaySize.x / 2.0f, io.DisplaySize.y), ImVec2(screenPos.x, screenPos.y), IM_COL32(255, 0, 0, 255), 1.5f);
-                if (g_ESP_Player) draw->AddText(ImVec2(screenPos.x - 10, screenPos.y - 50), IM_COL32(255, 255, 255, 255), "PLAYER");
-            }
-        }
-    }
 }
 
 typedef void (*eglSwapBuffers_t)(void* dpy, void* surf);
 eglSwapBuffers_t orig_eglSwapBuffers;
 
 void hook_eglSwapBuffers(void* dpy, void* surf) {
+    if (!g_ImGuiInitialized) {
+        // Initialize ImGui safely on the first frame when we have the window surface
+        g_Window = ANativeWindow_fromSurface((JNIEnv*)dpy, (jobject)surf);
+        ImGui::CreateContext();
+        ImGui_ImplAndroid_Init(g_Window);
+        ImGui_ImplOpenGL3_Init("#version 300 es");
+        g_ImGuiInitialized = true;
+    }
+
     if (g_MenuOpen) {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplAndroid_NewFrame();
@@ -198,10 +193,7 @@ void* hack_thread(void* arg) {
 }
 
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
-    ImGui::CreateContext();
-    ImGui_ImplAndroid_Init(ANativeWindow_fromSurface(dpy, surf));
-    ImGui_ImplOpenGL3_Init("#version 300 es");
-    
+    // Do NOT initialize ImGui here. Wait for the hook.
     void* target = dlsym(RTLD_DEFAULT, "eglSwapBuffers");
     A64HookFunction(target, (void*)hook_eglSwapBuffers, (void**)&orig_eglSwapBuffers);
     
