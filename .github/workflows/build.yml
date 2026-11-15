@@ -19,9 +19,9 @@ jobs:
           unzip v1.90.1.zip
           mv imgui-1.90.1 imgui
           git clone https://github.com/Rprop/And64InlineHook.git
-          # Move the hook files directly to the root so CMake can find them
-          mv And64InlineHook/And64InlineHook.cpp .
-          mv And64InlineHook/And64InlineHook.hpp .
+          cp And64InlineHook/And64InlineHook.cpp .
+          cp And64InlineHook/And64InlineHook.hpp .
+          ls -la # Lists files to verify they are there
 
       - name: Configure CMake
         run: |
